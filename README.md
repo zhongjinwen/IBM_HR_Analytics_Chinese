@@ -16,7 +16,6 @@
 - ✅ **字段名全中文**：35个字段全部翻译为中文
 - ✅ **变量值精准翻译**：分类变量的值按官方定义精准汉化
 - ✅ **Excel 友好**：UTF-8 with BOM 编码，直接打开不乱码
-- ✅ **完整版本追溯**：保留 v1.0、v2.0、v3.0、v4.0 完整版本
 
 **本仓库已包含原始数据文件，无需额外下载。**
 
@@ -24,8 +23,8 @@
 
 ## 🔍 v4.0 本土化优化说明
 
-| 字段 | v3.0 翻译 | **v4.0 优化** | 优化理由 |
-|------|-----------|---------------|----------|
+| 原字段 | v3.0 翻译 | v4.0 优化 | 优化理由 |
+|--------|-----------|-----------|----------|
 | JobRole | 职位角色 | **岗位** | HR领域常用术语 |
 | JobLevel | 职位等级 | **职级** | 更简洁专业 |
 | JobInvolvement | 工作投入度 | **敬业度** | HR常用术语 |
@@ -60,8 +59,8 @@
 
 ### 翻译效果示例
 
-| 原字段 | 原值 | **v4.0 翻译** |
-|--------|------|---------------|
+| 原字段 | 原值 | v4.0 翻译 |
+|--------|------|-----------|
 | Attrition | Yes | 是否离职: **是** |
 | JobRole | Sales Executive | 岗位: **销售主管** |
 | JobInvolvement | 3 | 敬业度: **高** |
@@ -97,99 +96,97 @@ source venv/bin/activate
 bash
 pip install pandas
 4. 选择版本运行
-运行 v4.0（推荐 - 本土化优化版）
-bash
-python src/translate_data_v4.py
-运行 v3.0（官方修正版）
-bash
-python src/translate_data_v3.py
-运行 v2.0（增强汉化版）
-bash
-python src/translate_data_v2.py
-运行 v1.0（基础版）
-bash
-python src/translate_data_v1.py
+版本	命令	说明
+v4.0	python src/translate_data_v4.py	推荐：本土化优化版
+v3.0	python src/translate_data_v3.py	官方修正版
+v2.0	python src/translate_data_v2.py	增强汉化版
+v1.0	python src/translate_data_v1.py	基础版
 5. 输出文件
 版本	输出文件	说明
 v1.0	output/IBM_HR_员工流失数据_汉化版.csv	仅列名汉化
 v2.0	output/IBM_HR_员工流失数据_全汉化版.csv	列名+变量值汉化
-v3.0	output/IBM_HR_员工流失数据_官方修正版.csv	基于官方定义的精准汉化
-v4.0	output/IBM_HR_员工流失数据_本土化版.csv	官方定义 + 本土化表达优化
+v3.0	output/IBM_HR_员工流失数据_官方修正版.csv	基于官方定义
+v4.0	output/IBM_HR_员工流失数据_本土化版.csv	官方定义+本土化优化
 📁 项目结构
 text
 ├── data/
-│   └── WA_Fn-UseC_-HR-Employee-Attrition.csv    # 原始数据（已包含）
+│   └── WA_Fn-UseC_-HR-Employee-Attrition.csv
 ├── src/
-│   ├── translate_data_v1.py                      # v1.0 仅列名汉化
-│   ├── translate_data_v2.py                      # v2.0 完整汉化
-│   ├── translate_data_v3.py                      # v3.0 官方修正版
-│   └── translate_data_v4.py                      # v4.0 本土化优化版
-├── output/                                        # 输出目录（运行后生成）
-│   ├── IBM_HR_员工流失数据_汉化版.csv
-│   ├── IBM_HR_员工流失数据_全汉化版.csv
-│   ├── IBM_HR_员工流失数据_官方修正版.csv
-│   └── IBM_HR_员工流失数据_本土化版.csv
+│   ├── translate_data_v1.py
+│   ├── translate_data_v2.py
+│   ├── translate_data_v3.py
+│   └── translate_data_v4.py
+├── output/
 ├── .gitignore
-├── LICENSE                                       # MIT License
-├── DATA_LICENSE.md                                # 数据来源声明
-└── README.md                                      # 本文档
+├── LICENSE
+├── DATA_LICENSE.md
+└── README.md
 📈 数据分析示例
 python
 import pandas as pd
 
-# 读取 v4.0 本土化版数据
+# 读取 v4.0 数据
 df = pd.read_csv('output/IBM_HR_员工流失数据_本土化版.csv')
 
-# 查看不同岗位的离职率
-job_attrition = df.groupby('岗位')['是否离职'].value_counts(normalize=True).unstack()
-print(job_attrition)
+# 1. 不同岗位的离职率
+print("=== 各岗位离职率 ===")
+print(df.groupby('岗位')['是否离职'].value_counts(normalize=True).unstack())
 
-# 查看敬业度与离职的关系
-engagement_attrition = df.groupby('敬业度')['是否离职'].value_counts(normalize=True).unstack()
-print(engagement_attrition)
+# 2. 敬业度与离职的关系
+print("\n=== 敬业度与离职 ===")
+print(df.groupby('敬业度')['是否离职'].value_counts(normalize=True).unstack())
 
-# 查看跳槽次数分布
+# 3. 跳槽次数分布
+print("\n=== 跳槽次数分布 ===")
 print(df['跳槽次数'].value_counts().sort_index())
 
-# 查看调薪幅度与离职的关系
-salary_hike_attrition = df.groupby('调薪幅度')['是否离职'].value_counts(normalize=True).unstack()
-print(salary_hike_attrition)
-🔄 版本对比
-版本	字段名汉化	变量值汉化	基于官方定义	本土化表达	Excel友好
+# 4. 调薪幅度与离职
+print("\n=== 调薪幅度与离职 ===")
+print(df.groupby('调薪幅度')['是否离职'].value_counts(normalize=True).unstack())
+🔄 版本功能对比
+版本	字段名汉化	变量值汉化	基于官方定义	本土化优化	Excel友好
 v1.0	✅	❌	❌	❌	✅
 v2.0	✅	✅	❌	❌	✅
 v3.0	✅	✅	✅	❌	✅
 v4.0	✅	✅	✅	✅	✅
 ❓ 常见问题
 Q: 应该使用哪个版本？
-A:
+A: 根据您的需求选择：
 
-推荐 v4.0：基于官方定义 + 本土化表达，最适合中文用户
+v4.0（推荐）：最适合中文用户，既有官方定义的准确性，又符合国内HR用语习惯
 
-v3.0：需要与英文原版严格对应时使用
+v3.0：需要与英文原版严格对照时使用
 
-v2.0：需要更完整汉化但不在意官方定义时使用
+v2.0：只需要完整汉化，不关心官方定义时使用
 
-v1.0：只需要列名汉化时使用
+v1.0：只需要列名是中文，变量值保持英文时使用
 
 Q: v4.0 的优化依据是什么？
 A:
 
-基于 Kaggle 原数据集官方定义保证数据准确性
+数据准确性：严格遵循 Kaggle 官方定义
 
-参考国内HR领域的常用术语进行本土化优化
+术语专业性：参考国内HR领域常用术语
 
-兼顾专业性和可读性
+表达习惯性：符合中文表达习惯，易于理解
 
 Q: 输出文件乱码怎么办？
-A: 所有版本均使用 UTF-8 with BOM 编码，Excel 应能正常打开。如果仍有问题：
+A: 所有版本均使用 UTF-8 with BOM 编码，Excel 可直接打开。如仍有问题：
 
 用记事本打开，另存为 ANSI 编码
 
-或使用 VS Code 打开
+或使用 VS Code、记事本++等编辑器打开
 
 Q: 提示找不到文件？
-A: 确保 data/ 目录下有原始 CSV 文件。如缺失，可从 Kaggle 下载。
+A: 确保目录结构正确：
+
+text
+项目根目录/
+├── data/
+│   └── WA_Fn-UseC_-HR-Employee-Attrition.csv
+└── src/
+    └── translate_data_v4.py
+如缺失数据文件，可从 Kaggle 下载。
 
 ⚠️ 使用声明
 数据来源: 本数据集源自 Kaggle 公开数据集，原始许可证为 DbCL v1.0
