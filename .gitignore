@@ -19,4 +19,5 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-# 注意：data/ 不忽略，允许上传源数据
+# 注意：data/ 不忽略，允许上传源数据"output/" 
+"*.csv" 
