@@ -96,7 +96,7 @@ VALUE_TRANSLATION = {
     # 教育程度 (按原数据集定义)
     '教育程度': {
         1: '高中及以下',    # Below College
-        2: '专科',          # College
+        2: '大专',          # College (更符合国内表达)
         3: '本科',          # Bachelor
         4: '硕士',          # Master
         5: '博士'           # Doctor
@@ -202,20 +202,32 @@ def main():
     if not os.path.exists(INPUT_FILE):
         print(f"❌ 错误: 找不到输入文件 {INPUT_FILE}")
         print("请确保 data/ 目录下存在原始数据文件")
+        print("文件结构应为:")
+        print("  📁 项目根目录/")
+        print("  ├── 📁 data/")
+        print("  │   └── WA_Fn-UseC_-HR-Employee-Attrition.csv")
+        print("  └── 📁 src/")
+        print("      └── translate_data_v4.py")
         return
     
     # 创建输出目录
     Path(OUTPUT_DIR).mkdir(exist_ok=True)
+    print(f"📁 输出目录: {OUTPUT_DIR}/")
     
     # 读取数据
     print(f"\n📖 读取数据: {INPUT_FILE}")
-    df = pd.read_csv(INPUT_FILE)
-    print(f"✅ 读取成功: {len(df)} 行, {len(df.columns)} 列")
+    try:
+        df = pd.read_csv(INPUT_FILE)
+        print(f"✅ 读取成功! 共 {len(df):,} 行, {len(df.columns)} 列")
+    except Exception as e:
+        print(f"❌ 读取失败: {e}")
+        return
     
     # 翻译列名
     print("\n🔄 步骤1: 翻译列名...")
     df.rename(columns=COLUMN_TRANSLATION, inplace=True)
     print("✅ 列名翻译完成")
+    print(f"  当前列名: {', '.join(df.columns[:5])} ...")
     
     # 翻译变量值
     print("\n🔄 步骤2: 翻译分类变量值...")
@@ -223,15 +235,22 @@ def main():
     for col in df.columns:
         if col in VALUE_TRANSLATION:
             mapping = VALUE_TRANSLATION[col]
-            df[col] = df[col].map(mapping).fillna(df[col])
-            print(f"  ✓ 翻译列: {col}")
-            translated_count += 1
+            try:
+                df[col] = df[col].map(mapping).fillna(df[col])
+                print(f"  ✓ 翻译列: {col}")
+                translated_count += 1
+            except Exception as e:
+                print(f"  ⚠️ 列 {col} 翻译出错: {e}")
     print(f"✅ 共翻译 {translated_count} 列的分类变量")
     
     # 保存结果
     print(f"\n💾 步骤3: 保存文件 - {OUTPUT_FILE}")
-    df.to_csv(OUTPUT_FILE, index=False, encoding='utf-8-sig')
-    print("✅ 保存成功!")
+    try:
+        df.to_csv(OUTPUT_FILE, index=False, encoding='utf-8-sig')
+        print("✅ 保存成功!")
+    except Exception as e:
+        print(f"❌ 保存失败: {e}")
+        return
     
     # 预览
     print("\n📊 数据预览 (前5行):")
@@ -245,9 +264,20 @@ def main():
     if '是否离职' in df.columns:
         attrition_rate = df['是否离职'].value_counts(normalize=True)
         print(f"\n📉 离职率: {attrition_rate.get('是', 0):.2%}")
+        print(f"   - 离职人数: {attrition_rate.get('是', 0) * len(df):.0f}")
+        print(f"   - 留任人数: {attrition_rate.get('否', 0) * len(df):.0f}")
     
     print(f"\n✨ 完成！输出文件: {OUTPUT_FILE}")
-    print("注: v4.0 基于 Kaggle 官方定义 + 本土化表达优化")
+    print("\n📝 版本说明: v4.0 基于 Kaggle 官方定义 + 本土化表达优化")
+    print("  主要优化项:")
+    print("  • 岗位 (JobRole)")
+    print("  • 敬业度 (JobInvolvement)")
+    print("  • 工作与生活平衡 (WorkLifeBalance)")
+    print("  • 调薪幅度 (PercentSalaryHike)")
+    print("  • 股权激励等级 (StockOptionLevel)")
+    print("  • 总工龄 (TotalWorkingYears)")
+    print("  • 跳槽次数 (NumCompaniesWorked)")
+    print("  • 大专 (Education=2)")
 
 if __name__ == "__main__":
     main()
