@@ -124,17 +124,25 @@ text
 📈 数据分析示例
 python
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # 读取 v4.0 数据
 df = pd.read_csv('output/IBM_HR_员工流失数据_本土化版.csv')
 
+# 设置中文字体
+plt.rcParams['font.sans-serif'] = ['SimHei']
+plt.rcParams['axes.unicode_minus'] = False
+
 # 1. 不同岗位的离职率
 print("=== 各岗位离职率 ===")
-print(df.groupby('岗位')['是否离职'].value_counts(normalize=True).unstack())
+job_attrition = df.groupby('岗位')['是否离职'].value_counts(normalize=True).unstack()
+print(job_attrition)
 
 # 2. 敬业度与离职的关系
 print("\n=== 敬业度与离职 ===")
-print(df.groupby('敬业度')['是否离职'].value_counts(normalize=True).unstack())
+engagement_attrition = df.groupby('敬业度')['是否离职'].value_counts(normalize=True).unstack()
+print(engagement_attrition)
 
 # 3. 跳槽次数分布
 print("\n=== 跳槽次数分布 ===")
@@ -142,13 +150,70 @@ print(df['跳槽次数'].value_counts().sort_index())
 
 # 4. 调薪幅度与离职
 print("\n=== 调薪幅度与离职 ===")
-print(df.groupby('调薪幅度')['是否离职'].value_counts(normalize=True).unstack())
+hike_attrition = df.groupby('调薪幅度')['是否离职'].value_counts(normalize=True).unstack()
+print(hike_attrition)
+
+# 5. 可视化：工作与生活平衡 vs 离职
+plt.figure(figsize=(10, 6))
+sns.countplot(data=df, x='工作与生活平衡', hue='是否离职')
+plt.title('工作与生活平衡与离职关系')
+plt.show()
 🔄 版本功能对比
-版本	字段名汉化	变量值汉化	基于官方定义	本土化优化	Excel友好
-v1.0	✅	❌	❌	❌	✅
-v2.0	✅	✅	❌	❌	✅
-v3.0	✅	✅	✅	❌	✅
-v4.0	✅	✅	✅	✅	✅
+📊 各版本功能一览
+v1.0（基础版）
+
+✅ 字段名汉化
+
+❌ 变量值汉化
+
+❌ 基于官方定义
+
+❌ 本土化表达优化
+
+✅ Excel友好编码
+
+v2.0（增强汉化版）
+
+✅ 字段名汉化
+
+✅ 变量值汉化
+
+❌ 基于官方定义
+
+❌ 本土化表达优化
+
+✅ Excel友好编码
+
+v3.0（官方修正版）
+
+✅ 字段名汉化
+
+✅ 变量值汉化
+
+✅ 基于官方定义
+
+❌ 本土化表达优化
+
+✅ Excel友好编码
+
+v4.0（本土化优化版） - 推荐
+
+✅ 字段名汉化
+
+✅ 变量值汉化
+
+✅ 基于官方定义
+
+✅ 本土化表达优化
+
+✅ Excel友好编码
+
+💡 版本选择建议
+使用场景	推荐版本	理由
+中文用户日常分析	v4.0	最符合中文HR用语习惯
+需要严格对照英文原版	v3.0	基于官方定义，术语准确
+只需要字段名是中文	v2.0	变量值保留英文，便于对照
+基础教学演示	v1.0	简单明了
 ❓ 常见问题
 Q: 应该使用哪个版本？
 A: 根据您的需求选择：
@@ -161,14 +226,38 @@ v2.0：只需要完整汉化，不关心官方定义时使用
 
 v1.0：只需要列名是中文，变量值保持英文时使用
 
-Q: v4.0 的优化依据是什么？
-A:
+Q: v4.0 相比 v3.0 有哪些优化？
+A: v4.0 在 v3.0 的基础上进行了本土化表达优化：
 
-数据准确性：严格遵循 Kaggle 官方定义
+职位角色 → 岗位
 
-术语专业性：参考国内HR领域常用术语
+职位等级 → 职级
 
-表达习惯性：符合中文表达习惯，易于理解
+工作投入度 → 敬业度
+
+工作满意度 → 工作满意
+
+工作生活平衡 → 工作与生活平衡
+
+薪资涨幅百分比 → 调薪幅度
+
+股票期权等级 → 股权激励等级
+
+总工作年限 → 总工龄
+
+本公司工作年限 → 本企业工龄
+
+现任职位年限 → 现岗年限
+
+上次晋升至今年限 → 晋升间隔
+
+曾工作公司数 → 跳槽次数
+
+环境满意度 → 环境满意
+
+关系满意度 → 人际关系满意
+
+去年培训次数 → 年度培训次数
 
 Q: 输出文件乱码怎么办？
 A: 所有版本均使用 UTF-8 with BOM 编码，Excel 可直接打开。如仍有问题：
