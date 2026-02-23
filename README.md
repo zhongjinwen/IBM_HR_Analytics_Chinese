@@ -9,6 +9,7 @@
 本项目是 [Kaggle IBM HR Analytics Employee Attrition & Performance](https://www.kaggle.com/datasets/pavansubhasht/ibm-hr-analytics-attrition-dataset) 数据集的**本土化优化汉化版**。
 
 原数据集包含1470名员工的信息，共35个字段，用于分析员工流失（Attrition）因素。
+
 免责声明：本代码处理的是公开数据集，不涉及真实员工信息。
 
 **✨ v4.0 核心特性：**
