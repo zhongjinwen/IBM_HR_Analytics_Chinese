@@ -2,20 +2,25 @@
 """
 IBM HR 员工流失数据集 - 汉化脚本 v5.0
 ======================================
-基于 v4.0 优化，输出可直接用于 Excel 分析的汉化数据集（超级表样式）
+基于 v4.0 优化，增加有序变量和二元变量的编码列，并添加婚姻状况、出差频率的编码列
+调薪幅度设置为百分比格式（原数值/100，显示为整数百分比，如11%）
 
 功能：
-1. 将35个字段名翻译为更符合中文HR术语的命名
-2. 将分类变量的值按原数据集定义精准翻译，并保留原始数值作为编码列（适用于数值型分类变量）
-3. 输出 Excel 文件（仅包含“数据”工作表，格式化为超级表，命名为 HRDATA）
-4. 列顺序按国内阅读习惯及企业系统对接需求排列（员工编号为首列）
-5. 应用蓝色主题样式（微软雅黑字体、深蓝标题、行条纹），并自动调整列宽
+1. 将35个字段名翻译为更符合中文HR术语的命名（“教育程度”改为“学历”）
+2. 将分类变量的值按原数据集定义精准翻译
+3. 为有序分类变量（如学历、满意度）保留原始数值作为编码列
+4. 为二元变量（是否离职、是否加班）创建0/1编码列（是否成年为常数列，不编码）
+5. 为无序分类变量（婚姻状况、出差频率）添加数值编码列（因子化编码）
+6. 调薪幅度：将原始整数除以100，并设置为不带小数的百分比格式（如11→11%）
+7. 职级（JobLevel）为数值，仅翻译列名，不添加编码列
+8. 输出 Excel 文件，格式化为超级表（蓝色主题、自动列宽）
+9. 列顺序按国内阅读习惯及企业系统对接需求排列（员工编号为首列）
 """
 
 import pandas as pd
 import os
 from pathlib import Path
-from openpyxl.styles import Font, Alignment, PatternFill
+from openpyxl.styles import Font, Alignment, PatternFill, numbers
 from openpyxl.worksheet.table import Table, TableStyleInfo
 from openpyxl.utils import get_column_letter
 
@@ -32,7 +37,7 @@ COLUMN_TRANSLATION = {
     'MaritalStatus': '婚姻状况',
     'Department': '部门',
     'JobRole': '岗位',
-    'JobLevel': '职级',
+    'JobLevel': '职级',          # 数值，仅翻译列名，不添加编码列
     
     # 工作相关
     'BusinessTravel': '出差频率',
@@ -45,7 +50,7 @@ COLUMN_TRANSLATION = {
     'WorkLifeBalance': '工作与生活平衡',
     
     # 教育背景
-    'Education': '教育程度',
+    'Education': '学历',                     # 教育程度 → 学历
     'EducationField': '专业',
     
     # 薪酬福利
@@ -53,7 +58,7 @@ COLUMN_TRANSLATION = {
     'DailyRate': '日薪',
     'MonthlyRate': '月薪',
     'MonthlyIncome': '月收入',
-    'PercentSalaryHike': '调薪幅度',
+    'PercentSalaryHike': '调薪幅度',   # 将除以100并设为百分比格式
     'StockOptionLevel': '股权激励等级',
     
     # 工作经历
@@ -72,7 +77,7 @@ COLUMN_TRANSLATION = {
     'Attrition': '是否离职',
     'EmployeeCount': '员工计数',
     'EmployeeNumber': '员工编号',
-    'Over18': '是否成年',
+    'Over18': '是否成年',        # 常数列，仅翻译，不编码
     'TrainingTimesLastYear': '年度培训次数'
 }
 
@@ -81,7 +86,7 @@ VALUE_TRANSLATION = {
     # 二元变量
     '是否离职': {'Yes': '是', 'No': '否'},
     '是否加班': {'Yes': '是', 'No': '否'},
-    '是否成年': {'Y': '是', 'N': '否'},
+    '是否成年': {'Y': '是', 'N': '否'},   # 保留翻译，但数据中只有Y
     
     # 出差频率
     '出差频率': {
@@ -97,8 +102,8 @@ VALUE_TRANSLATION = {
         'Human Resources': '人力资源部'
     },
     
-    # 教育程度
-    '教育程度': {
+    # 学历
+    '学历': {                           # 原键“教育程度”改为“学历”
         1: '大专以下',
         2: '大专',
         3: '本科',
@@ -196,10 +201,36 @@ VALUE_TRANSLATION = {
     }
 }
 
-# ==================== 3. 基础列顺序（员工编号为首列）====================
+# ==================== 3. 需要添加编码列的变量分类 ====================
+
+# 有序分类变量（保留原始数值作为编码列）
+ORDERED_EN_COLS = [
+    'Education',                # 学历
+    'EnvironmentSatisfaction',  # 环境满意
+    'RelationshipSatisfaction', # 人际关系满意
+    'JobSatisfaction',          # 工作满意
+    'JobInvolvement',           # 敬业度
+    'WorkLifeBalance',          # 工作与生活平衡
+    'PerformanceRating',        # 绩效评级
+    'StockOptionLevel'          # 股权激励等级
+]
+
+# 二元变量（创建0/1编码）
+BINARY_EN_COLS = {
+    'Attrition': {'Yes': 1, 'No': 0},
+    'OverTime': {'Yes': 1, 'No': 0}
+}
+
+# 无序分类变量（需要因子化编码）— 包括婚姻状况和出差频率
+UNORDERED_EN_COLS = [
+    'MaritalStatus',   # 婚姻状况
+    'BusinessTravel'   # 出差频率
+]
+
+# ==================== 4. 基础列顺序（员工编号为首列）====================
 BASE_COLUMN_ORDER = [
     '员工编号',
-    '年龄', '性别', '婚姻状况', '教育程度', '专业', '是否成年',
+    '年龄', '性别', '婚姻状况', '学历', '专业', '是否成年',
     '部门', '岗位', '职级', '出差频率', '离家距离', '是否加班', '标准工时', '年度培训次数',
     '总工龄', '本企业工龄', '现岗年限', '晋升间隔', '与现任经理共事年限', '跳槽次数',
     '月收入', '时薪', '日薪', '月薪', '调薪幅度', '股权激励等级',
@@ -230,8 +261,8 @@ def apply_excel_formatting(worksheet):
     """
     应用 Excel 格式：超级表、字体、列宽、颜色
     超级表命名为 HRDATA
+    同时设置调薪幅度列为不带小数的百分比格式（如11%）
     """
-    # 获取数据区域
     max_row = worksheet.max_row
     max_col = worksheet.max_column
     ref = f"A1:{get_column_letter(max_col)}{max_row}"
@@ -274,6 +305,14 @@ def apply_excel_formatting(worksheet):
         if adjusted_width > 30:
             adjusted_width = 30
         worksheet.column_dimensions[col_letter].width = adjusted_width
+    
+    # 找到“调薪幅度”列，设置为不带小数的百分比格式（FORMAT_PERCENTAGE 对应 0%）
+    for idx, cell in enumerate(worksheet[1]):
+        if cell.value == "调薪幅度":
+            col_letter = get_column_letter(idx + 1)
+            for row_num in range(2, worksheet.max_row + 1):
+                worksheet[f"{col_letter}{row_num}"].number_format = numbers.FORMAT_PERCENTAGE
+            break
 
 def main():
     print("="*60)
@@ -290,7 +329,7 @@ def main():
     Path(OUTPUT_DIR).mkdir(exist_ok=True)
     print(f"📁 输出目录: {OUTPUT_DIR}/")
     
-    # 读取数据
+    # 读取原始数据（保留一份原始副本用于提取编码）
     print(f"\n📖 读取数据: {INPUT_FILE}")
     try:
         df_original = pd.read_csv(INPUT_FILE)
@@ -299,7 +338,12 @@ def main():
         print(f"❌ 读取失败: {e}")
         return
     
-    # 复制一份用于翻译
+    # ==================== 调薪幅度转换为小数 ====================
+    if 'PercentSalaryHike' in df_original.columns:
+        df_original['PercentSalaryHike'] = df_original['PercentSalaryHike'] / 100
+        print("  已将调薪幅度原始值除以100，准备设为百分比格式")
+    
+    # 复制一份用于翻译（此时调薪幅度已为小数）
     df = df_original.copy()
     
     # 翻译列名
@@ -307,35 +351,65 @@ def main():
     df.rename(columns=COLUMN_TRANSLATION, inplace=True)
     print("✅ 列名翻译完成")
     
-    # 翻译变量值，同时为数值型分类变量添加编码列
-    print("\n🔄 步骤2: 翻译分类变量值并添加编码列...")
-    translated_count = 0
+    # 构建英-中列名映射字典
+    en_to_cn = COLUMN_TRANSLATION
+    
+    # ==================== 添加编码列 ====================
+    print("\n🔄 步骤2: 为有序变量、二元变量和无序变量添加数值编码列...")
     code_columns_added = []
+    
+    # 2.1 为有序分类变量添加原始数值编码（职级不包含在内）
+    for en_col in ORDERED_EN_COLS:
+        if en_col in df_original.columns:
+            cn_col = en_to_cn[en_col]
+            code_col = cn_col + "编码"
+            # 直接从原始数据中取出该列的值（本身就是数值）
+            df[code_col] = df_original[en_col]
+            code_columns_added.append(code_col)
+            print(f"  ✓ 添加编码列: {code_col} (有序变量)")
+    
+    # 2.2 为二元变量创建0/1编码（不包括是否成年）
+    for en_col, mapping in BINARY_EN_COLS.items():
+        if en_col in df_original.columns:
+            cn_col = en_to_cn[en_col]
+            code_col = cn_col + "编码"
+            df[code_col] = df_original[en_col].map(mapping)
+            code_columns_added.append(code_col)
+            print(f"  ✓ 添加编码列: {code_col} (二元变量)")
+    
+    # 2.3 为无序分类变量创建因子化编码（婚姻状况、出差频率）
+    for en_col in UNORDERED_EN_COLS:
+        if en_col in df_original.columns:
+            cn_col = en_to_cn[en_col]
+            code_col = cn_col + "编码"
+            # 使用 factorize 生成 0,1,2... 编码（顺序与原始值出现顺序相关）
+            codes, uniques = pd.factorize(df_original[en_col])
+            df[code_col] = codes
+            code_columns_added.append(code_col)
+            print(f"  ✓ 添加编码列: {code_col} (无序变量，编码映射: {dict(zip(uniques, range(len(uniques))))})")
+    
+    print(f"✅ 共添加 {len(code_columns_added)} 个编码列")
+    
+    # ==================== 翻译变量值 ====================
+    print("\n🔄 步骤3: 翻译分类变量值...")
+    translated_count = 0
     for col in df.columns:
         if col in VALUE_TRANSLATION:
-            # 检查当前列的数据类型（还未映射，仍是原始值）
-            if pd.api.types.is_numeric_dtype(df[col]):
-                # 数值型分类变量，先保存编码列
-                code_col = col + "编码"
-                df[code_col] = df[col]  # 保留原始数值
-                code_columns_added.append(code_col)
-                # 再进行值映射
-                df[col] = df[col].map(VALUE_TRANSLATION[col]).fillna(df[col])
-                print(f"  ✓ 翻译列: {col}，并添加编码列 {code_col}")
-            else:
-                # 非数值型（如字符串），直接映射
+            try:
                 df[col] = df[col].map(VALUE_TRANSLATION[col]).fillna(df[col])
                 print(f"  ✓ 翻译列: {col}")
-            translated_count += 1
-    print(f"✅ 共翻译 {translated_count} 列的分类变量，添加 {len(code_columns_added)} 个编码列")
+                translated_count += 1
+            except Exception as e:
+                print(f"  ⚠️ 列 {col} 翻译出错: {e}")
+    print(f"✅ 共翻译 {translated_count} 列的分类变量")
     
-    # 步骤3: 按照国内阅读习惯重新排序列
-    print("\n🔄 步骤3: 重新排序列（员工编号为首列，其他按国内习惯）...")
+    # 步骤4: 按照国内阅读习惯重新排序列
+    print("\n🔄 步骤4: 重新排序列（员工编号为首列，其他按国内习惯）...")
     df = reorder_columns(df, BASE_COLUMN_ORDER)
     print("✅ 列排序完成")
     
     # 保存 Excel 文件并应用格式
-    print(f"\n💾 步骤4: 保存并格式化 Excel 文件 - {OUTPUT_EXCEL_FILE}")
+    print(f"\n💾 步骤5: 保存并格式化 Excel 文件 - {OUTPUT_EXCEL_FILE}")
     try:
         with pd.ExcelWriter(OUTPUT_EXCEL_FILE, engine='openpyxl') as writer:
             df.to_excel(writer, sheet_name='数据', index=False)
@@ -351,7 +425,7 @@ def main():
     # 预览
     print("\n📊 数据预览 (前5行，关键列):")
     print("="*80)
-    preview_cols = ['员工编号', '年龄', '性别', '部门', '岗位', '是否离职', '月收入', '工作满意', '教育程度', '教育程度编码']
+    preview_cols = ['员工编号', '年龄', '性别', '部门', '岗位', '职级', '是否离职', '月收入', '工作满意', '学历', '学历编码', '婚姻状况', '婚姻状况编码', '出差频率', '出差频率编码', '调薪幅度']
     available_cols = [c for c in preview_cols if c in df.columns]
     print(df[available_cols].head().to_string())
     print("="*80)
@@ -365,13 +439,17 @@ def main():
     
     print(f"\n✨ 完成！输出文件: {OUTPUT_EXCEL_FILE}")
     print("\n📝 版本说明: v5.0")
-    print("   - 教育程度: 1 -> 大专以下")
-    print("   - 教育领域 → 专业")
+    print("   - 学历: 1->大专以下,2->大专,3->本科,4->硕士,5->博士")
+    print("   - 专业（原教育领域）")
+    print("   - 职级为数值，仅翻译列名，不添加编码列")
+    print("   - 是否成年为常数列，仅翻译，不添加编码列")
+    print("   - 为有序分类变量（学历、满意度等）添加了原始数值编码列")
+    print("   - 为二元变量（是否离职、是否加班）添加了0/1编码列")
+    print("   - 为婚姻状况、出差频率添加了因子化编码列（便于建模）")
+    print("   - 调薪幅度已除以100并设置为不带小数的百分比格式（如11→11%）")
     print("   - 输出 Excel 格式（超级表样式：蓝色主题、微软雅黑、自适应列宽，表格名称 HRDATA）")
-    print("   - 包含编码列便于分析")
     print("   - 员工编号置于首列，符合企业系统对接习惯")
     print("   - 其他列按国内HR阅读习惯排列")
-    print("\n⏭️ 后续将基于此输出开发分析代码（员工画像、流失分析、薪酬公平性、生命周期、职业路径、决策系统等）")
 
 if __name__ == "__main__":
     main()
