@@ -178,7 +178,7 @@ pip install -r requirements.txt
 
 | 项目 | 许可证 |
 |------|--------|
-| 汉化版本（脚本与文档） | [MIT License](./LICENSE) |
+| 汉化版本（脚本与文档） | [MIT License](./LICENSE.md) |
 | 原始数据 | [Open Data Commons Database Contents License (DbCL) v1.0](./DATA_LICENSE.md) |
 
 根据此许可证，您可以自由使用、修改和分享数据内容（包括商业用途），但必须遵守许可证条款。
