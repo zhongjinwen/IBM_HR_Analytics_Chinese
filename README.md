@@ -36,9 +36,11 @@
 ### 环境要求
 - Python 3.9+
 - 安装依赖库：
+
   ```bash
   pip install pandas openpyxl
-使用步骤
+
+  使用步骤
 克隆仓库
 
 bash
@@ -51,6 +53,7 @@ python src/translate_data_v5.py
 在 output/ 目录下获取生成的文件：
 
 IBM_HR_员工流失数据_本土化版.xlsx：可直接用 Excel 打开的汉化数据集
+
 
 📁 项目结构
 text
@@ -65,6 +68,8 @@ text
 ├── LICENSE                                        # MIT 许可证
 ├── DATA_LICENSE.md                                # 原始数据许可证（DbCL v1.0）
 └── README.md                                      # 本文件
+
+
 📊 数据说明
 数据规模
 样本数：1,470 条
