@@ -1,23 +1,23 @@
-# 虚拟环境
-venv/
-env/
-ENV/
-
-# Python缓存
+# Python 缓存
 __pycache__/
 *.py[cod]
 *$py.class
 
-# Jupyter
-.ipynb_checkpoints/
+# 虚拟环境
+venv/
+.venv/
+env/
 
-# IDE
+# 输出目录（只忽略临时文件，保留 Excel 文件）
+output/~$*.xlsx
+# 如果不想提交 output 下的任何文件，可改为 /output/，但当前需要提交 Excel，所以注释掉
+
+# 编辑器文件
 .vscode/
 .idea/
+*.swp
+*.swo
 
 # 系统文件
 .DS_Store
 Thumbs.db
-
-# 注意：data/ 不忽略，允许上传源数据"output/" 
-"*.csv" 
