@@ -5,8 +5,6 @@
 ![Pandas](https://img.shields.io/badge/pandas-2.2+-green.svg)
 ![Openpyxl](https://img.shields.io/badge/openpyxl-3.1+-orange.svg)
 
-[English](#english) | [中文](#)
-
 ---
 
 ## 📑 目录
@@ -92,8 +90,11 @@ python src/translate_data_v5.py
 │   └── WA_Fn-UseC_-HR-Employee-Attrition.csv    # 原始数据文件
 ├── src/
 │   └── translate_data_v5.py                      # 汉化脚本 v5.0
-├── output/
-│   └── IBM_HR_员工流失数据_本土化版.xlsx         # 生成的 Excel 文件
+├── analysis/                                      # 分析代码（v6.0+）
+│   └── src/
+│       └── full_analysis_report_v5.py             # 综合分析脚本
+├── output/                                        # 汉化生成的 Excel 文件
+│   └── IBM_HR_员工流失数据_本土化版.xlsx
 ├── .gitignore                                     # Git 忽略配置
 ├── LICENSE                                        # MIT 许可证
 ├── DATA_LICENSE.md                                # 原始数据许可证（DbCL v1.0）
@@ -184,7 +185,7 @@ python src/translate_data_v5.py
 - [ ] 职业发展路径分析（培训次数、晋升间隔对离职的影响）
 - [ ] 离职预测决策系统（机器学习建模及可视化报告）
 
-敬请期待！
+分析脚本位于 `analysis/src/full_analysis_report_v5.py`，可生成完整的 Word 报告和 Excel 风险表。欢迎尝试！
 
 ---
 
