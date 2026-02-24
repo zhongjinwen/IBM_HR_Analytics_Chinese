@@ -185,7 +185,7 @@ python src/translate_data_v5.py
 - [ ] 职业发展路径分析（培训次数、晋升间隔对离职的影响）
 - [ ] 离职预测决策系统（机器学习建模及可视化报告）
 
-分析脚本位于 `analysis/src/full_analysis_report_v5.py`，可生成完整的 Word 报告和 Excel 风险表。欢迎尝试！
+分析脚本位于 `analysis/src/full_analysis_report.py`，可生成完整的 Word 报告和 Excel 风险表。欢迎尝试！
 
 ---
 
