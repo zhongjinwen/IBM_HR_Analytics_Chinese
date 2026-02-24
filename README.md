@@ -38,20 +38,24 @@
 - Python 3.9+
 - 安装依赖库：
 
+```bash
 pip install pandas openpyxl
 使用步骤
 克隆仓库
 
+bash
 git clone https://github.com/zhongjinwen/IBM_HR_Analytics_Chinese.git
 cd IBM_HR_Analytics_Chinese
 运行汉化脚本（v5.0）
 
+bash
 python src/translate_data_v5.py
 在 output/ 目录下获取生成的文件：
 
 IBM_HR_员工流失数据_本土化版.xlsx：可直接用 Excel 打开的汉化数据集。
 
 📁 项目结构
+text
 .
 ├── data/
 │   └── WA_Fn-UseC_-HR-Employee-Attrition.csv    # 原始数据文件
