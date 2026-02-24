@@ -87,12 +87,12 @@ python src/translate_data_v5.py
 ```
 .
 ├── data/
-│   └── WA_Fn-UseC_-HR-Employee-Attrition.csv    # 原始数据文件
+│   └── WA_Fn-UseC_-HR-Employee-Attrition.csv      # 原始数据文件
 ├── src/
-│   └── translate_data_v5.py                      # 汉化脚本 v5.0
+│   └── translate_data_v5.py                       # 汉化脚本 v5.0
 ├── analysis/                                      # 分析代码（v6.0+）
 │   └── src/
-│       └── full_analysis_report_v5.py             # 综合分析脚本
+│       └── full_analysis_report.py                # 综合分析脚本
 ├── output/                                        # 汉化生成的 Excel 文件
 │   └── IBM_HR_员工流失数据_本土化版.xlsx
 ├── .gitignore                                     # Git 忽略配置
