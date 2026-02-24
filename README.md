@@ -53,16 +53,17 @@ IBM_HR_员工流失数据_本土化版.xlsx：可直接用 Excel 打开的汉化
 📁 项目结构
 text
 .
-├── data/                          # 原始数据文件（已包含）
-│   └── WA_Fn-UseC_-HR-Employee-Attrition.csv
-├── src/                            # 脚本
-│   └── translate_data_v5.py
-├── output/                         # 输出文件（脚本运行后生成）
-│   └── IBM_HR_员工流失数据_本土化版.xlsx
-├── .gitignore                      # Git 忽略配置
-├── LICENSE                         # MIT 许可证
-├── DATA_LICENSE.md                  # 原始数据许可证（DbCL v1.0）
-└── README.md
+├── data/
+│   └── WA_Fn-UseC_-HR-Employee-Attrition.csv    # 原始数据文件
+├── src/
+│   └── translate_data_v5.py                      # 汉化脚本 v5.0
+├── output/
+│   └── IBM_HR_员工流失数据_本土化版.xlsx         # 生成的 Excel 文件
+├── .gitignore                                     # Git 忽略配置
+├── LICENSE                                        # MIT 许可证
+├── DATA_LICENSE.md                                # 原始数据许可证（DbCL v1.0）
+└── README.md                                      # 本文件
+
 📊 数据说明
 数据规模
 样本数: 1,470 条
